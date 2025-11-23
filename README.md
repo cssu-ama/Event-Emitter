@@ -1,10 +1,6 @@
 # 📦 EventEmitter
 
-📝 **توضیحات**
-
-🔹 این مخزن شامل پیاده‌سازی کلاس **EventEmitter** است که رابطی مشابه EventEmitter در Node.js یا EventTarget در DOM دارد (با چند تفاوت ساده).
-
-🔹 هدف: امکان ثبت (subscribe) و لغو ثبت (unsubscribe) شنونده‌ها و منتشر کردن (emit) رویدادها و بازگرداندن خروجی کال‌بک‌ها.
+A lightweight implementation of an **EventEmitter** similar to Node.js or the DOM EventTarget interface. This class allows subscribing to events, emitting events, and unsubscribing listeners.
 
 ---
 
@@ -12,68 +8,74 @@
 
 ### `new EventEmitter()`
 
-🔸 یک نمونه جدید از EventEmitter می‌سازد.
-
-### `subscribe(eventName: string, callback: Function): { unsubscribe: Function }`
-
-🔸 پارامترها:
-
-* `eventName` — نام رویداد به صورت رشته
-* `callback` — تابعی که هنگام فراخوانی رویداد اجرا می‌شود
-
-🔸 خروجی:
-
-* یک آبجکت که متد `unsubscribe()` دارد؛ فراخوانی این متد باعث حذف کال‌بک از لیست مشترکین می‌شود و `undefined` برمی‌گرداند.
-
-### `emit(eventName: string, args?: any[]): any[]`
-
-🔸 پارامترها:
-
-* `eventName` — نام رویداد
-* `args` — آرایه‌ای از آرگومان‌هایی که به هر کال‌بک پاس داده می‌شود (اختیاری)
-
-🔸 خروجی:
-
-* آرایه‌ای از نتایج برگشتی تمام کال‌بک‌ها به ترتیبی که ثبت شده‌اند. در صورت نبودن شنونده، آرایه خالی برمی‌گردد.
+Creates a new EventEmitter instance.
 
 ---
 
-## 🚀 مثال استفاده
+### `subscribe(eventName: string, callback: Function): { unsubscribe: Function }`
+
+Registers a listener for the specified event.
+
+#### Parameters:
+
+* **eventName** — The name of the event to listen to.
+* **callback** — A function that will be executed when the event is emitted.
+
+#### Returns:
+
+* An object containing an `unsubscribe()` method. Calling it removes the callback from the event listener list and returns `undefined`.
+
+---
+
+### `emit(eventName: string, args?: any[]): any[]`
+
+Executes all listeners subscribed to the event and returns their results.
+
+#### Parameters:
+
+* **eventName** — The name of the event to emit.
+* **args** — (Optional) Array of arguments passed to every callback.
+
+#### Returns:
+
+* An array of results returned by each callback, in the order they were subscribed.
+* Returns an empty array if the event has no listeners.
+
+---
+
+## 🚀 Example Usage
 
 ```javascript
-const EventEmitter = require('./eventEmitter'); // یا import
+const EventEmitter = require('./eventEmitter');
 
 const emitter = new EventEmitter();
 
 const sub1 = emitter.subscribe('firstEvent', () => 5);
 const sub2 = emitter.subscribe('firstEvent', () => 6);
 
-console.log(emitter.emit('firstEvent')); // => [5, 6]
+console.log(emitter.emit('firstEvent')); // [5, 6]
 
 sub1.unsubscribe();
-console.log(emitter.emit('firstEvent')); // => [6]
+console.log(emitter.emit('firstEvent')); // [6]
 ```
 
 ---
 
-## 🧪 تست‌ها
-
-🔹 می‌توانید فایل `test/` یا راهنمای زیر را اضافه کنید تا با `jest` یا `mocha` تست‌ها اجرا شوند. مثال تست سریع با Jest:
+## 🧪 Example Test (Jest)
 
 ```javascript
 test('emit returns callback results in order', () => {
   const emitter = new EventEmitter();
   emitter.subscribe('ev', () => 1);
   emitter.subscribe('ev', () => 2);
-  expect(emitter.emit('ev')).toEqual([1,2]);
+  expect(emitter.emit('ev')).toEqual([1, 2]);
 });
 ```
 
 ---
 
-## ♻️ پیچیدگی و نکات پیاده‌سازی
+## 🔧 Implementation Notes
 
-🔸 ذخیره‌سازی لیسنرها: از ساختاری مانند `Map<string, Function[]>` استفاده شده است.
-
-🔸 حذف شنونده: هنگام `unsubscribe` از `Array.prototype.splice` یا فیلتر استفاده می‌شود.
-
+* Events are stored using a `Map<string, Function[]>` structure.
+* Listeners are removed using `Array.prototype.splice` inside `unsubscribe()`.
+* No two callbacks are assumed to be referentially identical, as per problem conditions.
